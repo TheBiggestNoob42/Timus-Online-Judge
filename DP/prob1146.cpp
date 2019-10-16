@@ -2,7 +2,7 @@
 using namespace std;
 
 #define MAX_N 100
-#define NEG_INF -2147483648
+#define NEG_INF -1000000000
 int dp[MAX_N][MAX_N];
 int N;
 
@@ -33,7 +33,7 @@ int main() {
 	for (int col = 0; col < N; col++) {
 		int col_max = NEG_INF;
 		for (int row = 0; row < N; row++) {
-			col_max = ((col_max > 0) ? col_max: 0) + dp[row][col];
+			col_max = ((col_max + dp[row][col] > dp[row][col]) ? col_max + dp[row][col] : dp[row][col]);
 		}
 		global_max = (col_max > global_max) ? col_max : global_max;
 	}
