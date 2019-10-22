@@ -4,25 +4,13 @@
 #include <iostream>
 #include <algorithm>
 #include <unordered_set>
+#include <queue>
 using namespace std;
 
 typedef pair<string, int> person;
+
 vector<person> list_of_people;
-
-vector<int> queue;
 map<int, vector<int>> usu;
-
-
-string to_string(vector<int>& vec) {
-	string str = "[";
-	for (int i = 0; i < vec.size() - 1; i++) {
-		// str += list_of_people[vec[i]].first + ", ";
-		str += to_string(vec[i]) + ", ";
-	}
-	// str += list_of_people[vec[vec.size() - 1]].first + "]";
-	str += to_string(vec[vec.size() - 1]) + "]";
-	return str;
-}
 
 int find(const vector<person>& vec, const person& p1) {
 	for (int x = 0; x < vec.size(); x++) {
@@ -50,19 +38,24 @@ void addEdge(int first, int second) {
 	usu[second].push_back(first);
 }
 
-void dfs(const int& pers1, int importance) {
-	for (int x = 0; x < queue.size(); x++) {
-		if (queue[x] == pers1) {
-			return;
+void bfs(const int& pers1) {
+	queue<int> q;
+
+	q.push(pers1);
+
+	int idx, importance;
+	while (!q.empty()) {
+		idx = q.front();
+		q.pop();
+		importance = list_of_people[idx].second;
+		
+		auto neighbors = usu[idx];
+		for (int x = 0; x < neighbors.size(); x++) {
+			if (list_of_people[neighbors[x]].second == -1) {
+				list_of_people[neighbors[x]].second = importance + 1;
+				q.push(neighbors[x]);
+			}
 		}
-	}
-
-	queue.push_back(pers1);
-	list_of_people[pers1].second = importance;
-
-	vector<int> neighbors = usu[pers1];
-	for (int x = 0; x < neighbors.size(); x++) {
-		dfs(neighbors[x], importance + 1);
 	}
 }
 
@@ -104,27 +97,20 @@ int main() {
 
 	person man = pair<string, int>("Isenbaev", 0);
 	int idx = find(list_of_people, man);
-	list_of_people[idx] = man;
+	if (idx != -1) {
+		list_of_people[idx] = man;
+	}
 
 	for (auto itr = usu.begin(); itr != usu.end(); itr++) {
 		clean(itr->second);
 	}
 
-	cout << endl;
-
-	/*
-	for (auto it = usu.begin(); it != usu.end(); it++) {
-		cout << "Key: " << list_of_people[it->first].first << endl;
-		cout << "Neighbors:" << to_string(it->second) << endl;
+	if (idx != -1) {
+		bfs(idx);
 	}
-	*/
-
-	dfs(idx, 0);
 
 	auto comp = [](const person& p1, const person& p2) -> bool {
-		string str1 = p1.first;
-		string str2 = p2.first;
-		return str1.compare(str2) < 0;
+		return p1.first.compare(p2.first) < 0;
 	};
 
 	sort(list_of_people.begin(), list_of_people.end(), comp);
